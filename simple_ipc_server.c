@@ -39,7 +39,7 @@ main(int argc, char **argv)
   }
 */
     kr = bootstrap_create_server(bootstrap_port, SERVICE_NAME, getuid(), FALSE, &server_port);
-    EXIT_ON_MACH_ERROR("bootstrap_create_service", kr, BOOTSTRAP_SUCCESS);
+    EXIT_ON_MACH_ERROR("bootstrap_create_server", kr, BOOTSTRAP_SUCCESS);
    
     kr = bootstrap_check_in(bootstrap_port, SERVICE_NAME, &server_port);
     EXIT_ON_MACH_ERROR("bootstrap_check_in", kr, BOOTSTRAP_SUCCESS);
