@@ -20,9 +20,29 @@ main(int argc, char **argv)
     msg_format_send_t  send_msg;
     mach_msg_header_t *recv_hdr, *send_hdr;
     mach_port_t        server_port;
-  /* 
+
 
   mach_port_t self_task = mach_task_self();
+
+  mach_port_t port_;
+  kr = mach_port_allocate(self_task,
+                                    MACH_PORT_RIGHT_RECEIVE,
+                                    &port_);
+  if (kr != KERN_SUCCESS) {
+    EXIT_ON_MACH_ERROR("mach_port_allocate(): ", kr, BOOTSTRAP_SUCCESS);
+    return kr;
+  }
+
+
+  kr = mach_port_insert_right(self_task,
+                                        port_,
+                                        port_,
+                                        MACH_MSG_TYPE_MAKE_SEND);
+  if (kr != KERN_SUCCESS) {
+    EXIT_ON_MACH_ERROR("mach_port_insert_right(): ", kr, BOOTSTRAP_SUCCESS);
+    return kr;
+  }
+
 
   mach_port_t bootstrap_port;
   kr = task_get_bootstrap_port(self_task, &bootstrap_port);
@@ -31,20 +51,10 @@ main(int argc, char **argv)
     return kr;
   }
 
-  mach_port_t bootstrap_subset_port;
-  kr = bootstrap_subset(bootstrap_port, self_task, &bootstrap_subset_port);
-  if (kr != KERN_SUCCESS) {
-    EXIT_ON_MACH_ERROR("bootstrap_subset(): ", kr, BOOTSTRAP_SUCCESS);
-    return kr;
-  }
-*/
-    // We should be using bootstrap_register instead
-    kr = bootstrap_create_server(bootstrap_port, SERVICE_NAME, getuid(), FALSE, &server_port);
-    EXIT_ON_MACH_ERROR("bootstrap_create_server", kr, BOOTSTRAP_SUCCESS);
+    kr = bootstrap_register(bootstrap_port, SERVICE_NAME, port_);
+    EXIT_ON_MACH_ERROR("bootstrap_register", kr, BOOTSTRAP_SUCCESS);
    
-    kr = bootstrap_check_in(bootstrap_port, SERVICE_NAME, &server_port);
-    EXIT_ON_MACH_ERROR("bootstrap_check_in", kr, BOOTSTRAP_SUCCESS);
-   
+    server_port = port_;
     printf("server_port = %d\n", server_port);
    
     for (;;) { // server loop
