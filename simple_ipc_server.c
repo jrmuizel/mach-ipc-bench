@@ -38,6 +38,7 @@ main(int argc, char **argv)
     return kr;
   }
 */
+    // We should be using bootstrap_register instead
     kr = bootstrap_create_server(bootstrap_port, SERVICE_NAME, getuid(), FALSE, &server_port);
     EXIT_ON_MACH_ERROR("bootstrap_create_server", kr, BOOTSTRAP_SUCCESS);
    
